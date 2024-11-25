@@ -42,8 +42,19 @@ def formatarData(celula):
     table_cell_properties.append(shade_obj)    
 
 ## =====================================================================
+print(r"""
+________            _____________                           __________  
+___  __ \_________________  /__(_)______ _______________    ___  ___  \ 
+__  /_/ /_  ___/  _ \  __  /__  /__  __ `__ \  _ \  ___/    __  / _ \  |
+_  ____/_  /   /  __/ /_/ / _  / _  / / / / /  __/ /__      _  / , _/ / 
+/_/     /_/    \___/\__,_/  /_/  /_/ /_/ /_/\___/\___/      | /_/|_| /  
+                                                             \______/   
+Iniciando processo de formatação...
+      """)
+
 pdf_relatorio_oleo = '' 
 documento_word_nome = ''
+
 
 try: 
     arquivos = os.listdir('./')
@@ -88,3 +99,5 @@ for i in documentoWord.paragraphs:
 documentoWord.save(caminhoWord)
 shutil.rmtree('./imagens_pdf')
 
+print("\nArquivos formatados com sucesso!\n")
+time.sleep(10)
