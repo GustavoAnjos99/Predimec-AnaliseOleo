@@ -27,6 +27,11 @@ def retornarData():
     datacorreta = f"{data[2]}/{data[1]}/{data[0]}"
     return datacorreta
 
+def retornarDataPasta():
+    data = str(date.today()).split("-")
+    datacorreta = f"{data[2]}-{data[1]}-{data[0]}"
+    return datacorreta
+
 def formatarData(celula):
     celula.text = retornarData()
     for paragraph in celula.paragraphs:
@@ -52,52 +57,66 @@ _  ____/_  /   /  __/ /_/ / _  / _  / / / / /  __/ /__      _  / , _/ /
 Iniciando processo de formatação...
       """)
 
-pdf_relatorio_oleo = '' 
+pdfs = []
 documento_word_nome = ''
-
-
-try: 
+try:
     arquivos = os.listdir('./')
     for arquivo in arquivos:
         if arquivo.endswith(".pdf"):
-            pdf_relatorio_oleo = arquivo
-        if arquivo.endswith(".docx"):
-            documento_word_nome = arquivo
-    w = open(documento_word_nome, 'rb')
-    documentoWord = Document(w)
+            pdfs.append(arquivo)
 except:
-    print("ERRO: Erro ao identificar arquivos para formatação.")
+    print("ERRO: Erro ao identificar PDFs para formatação.")
     time.sleep(10)
     sys.exit(1)
-    
-caminhoWord = os.path.join("RELATÓRIO FORMATADO", documento_word_nome)
-os.makedirs("RELATÓRIO FORMATADO", exist_ok=True)
-pdf_para_imagens(pdf_relatorio_oleo, "imagens_pdf")
-formatarData(documentoWord.tables[0].columns[0].cells[0])
 
-teste = 1
-nmImagens = len(os.listdir("./imagens_pdf"))
+if len(pdfs) < 1:
+    print("ERRO: Nenhum arquivo PDF encontrado.")
+    time.sleep(10)
+    sys.exit(1)
 
-for i in documentoWord.paragraphs:
-    if i.text == "[LISTA-IMAGENS]":
-        for j in os.listdir("./imagens_pdf"):
-            if teste != nmImagens:
-                paragrafo = documentoWord.add_paragraph()
-                paragrafo.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                img = paragrafo.add_run()
-                img.add_picture(rf"{str(pathlib.Path().resolve())}\imagens_pdf\{j}", width=Inches(6))
-                documentoWord.add_page_break() 
-            else:
-                paragrafo = documentoWord.add_paragraph()
-                paragrafo.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                img = paragrafo.add_run()
-                img.add_picture(rf"{str(pathlib.Path().resolve())}\imagens_pdf\{j}", width=Inches(6))
-            teste +=1
-        p = i._element
-        p.getparent().remove(p)
-        p._p = p._element = None
-documentoWord.save(caminhoWord)
-shutil.rmtree('./imagens_pdf')
+
+for itemPDF in pdfs:
+    try: 
+        arquivos = os.listdir('./')
+        for arquivo in arquivos:
+            if arquivo.endswith(".docx"):
+                documento_word_nome = arquivo
+        w = open(documento_word_nome, 'rb')
+        documentoWord = Document(w)
+    except:
+        print("ERRO: Erro ao identificar o modelo WORD para formatação.")
+        time.sleep(10)
+        sys.exit(1)
+
+    caminhoWord = os.path.join(f"RELATÓRIO FORMATADO/{retornarDataPasta()}/", f"{itemPDF.split(".")[0]}.docx")
+    os.makedirs(f"RELATÓRIO FORMATADO/{retornarDataPasta()}/", exist_ok=True)
+    pdf_para_imagens(itemPDF, "imagens_pdf")
+    formatarData(documentoWord.tables[0].columns[0].cells[0])
+
+    teste = 1
+    nmImagens = len(os.listdir("./imagens_pdf"))
+
+    for i in documentoWord.paragraphs:
+        if i.text == "[LISTA-IMAGENS]":
+            for j in os.listdir("./imagens_pdf"):
+                if teste != nmImagens:
+                    paragrafo = documentoWord.add_paragraph()
+                    paragrafo.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    img = paragrafo.add_run()
+                    img.add_picture(rf"{str(pathlib.Path().resolve())}\imagens_pdf\{j}", width=Inches(6))
+                    documentoWord.add_page_break() 
+                else:
+                    paragrafo = documentoWord.add_paragraph()
+                    paragrafo.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    img = paragrafo.add_run()
+                    img.add_picture(rf"{str(pathlib.Path().resolve())}\imagens_pdf\{j}", width=Inches(6))
+                teste +=1
+            p = i._element
+            p.getparent().remove(p)
+            p._p = p._element = None
+    documentoWord.save(caminhoWord)
+    shutil.rmtree('./imagens_pdf')
+    print(f"Arquivo [{itemPDF}] formatado.")
 
 print("\nArquivos formatados com sucesso!\n")
 time.sleep(10)
